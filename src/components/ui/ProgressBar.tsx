@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+
 interface ProgressBarProps {
   value: number;
   max?: number;
@@ -18,6 +20,13 @@ export function ProgressBar({
   animate = true,
 }: ProgressBarProps) {
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (barRef.current && animate) {
+      barRef.current.style.width = `${percentage}%`;
+    }
+  }, [percentage, animate]);
 
   return (
     <div className="w-full">
@@ -32,6 +41,7 @@ export function ProgressBar({
         style={{ height }}
       >
         <div
+          ref={barRef}
           className="rounded-full"
           style={{
             width: animate ? '0%' : `${percentage}%`,
@@ -39,14 +49,6 @@ export function ProgressBar({
             background: `linear-gradient(90deg, ${color}aa, ${color})`,
             boxShadow: `0 0 8px ${color}55`,
             transition: animate ? 'width 1.2s cubic-bezier(0.22, 1, 0.36, 1)' : 'none',
-            animationName: animate ? 'none' : undefined,
-          }}
-          ref={(el) => {
-            if (el && animate) {
-              requestAnimationFrame(() => {
-                el.style.width = `${percentage}%`;
-              });
-            }
           }}
         />
       </div>
