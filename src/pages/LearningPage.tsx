@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { lessons } from '@/data/content';
 import { useApp } from '@/context/AppContext';
-import * as Icons from 'lucide-react';
+import { getIcon } from '@/components/iconRegistry';
 import { EmptyState } from '@/components/ui/Feedback';
+import type { Lesson } from '@/types';
 
 const categoryIcons: Record<string, string> = {
   phishing: 'Fish',
@@ -27,8 +28,15 @@ const skillColors: Record<string, string> = {
 
 export function LearningPage() {
   const { state, completeLesson } = useApp();
-  const [selectedLesson, setSelectedLesson] = useState<typeof lessons[0] | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+
+  const ArrowLeftIcon = getIcon('ArrowLeft');
+  const ArrowRightIcon = getIcon('ArrowRight');
+  const CheckIcon = getIcon('Check');
+  const CheckCircle2Icon = getIcon('CheckCircle2');
+  const CheckSquareIcon = getIcon('CheckSquare');
+  const BookOpenIcon = getIcon('BookOpen');
 
   if (selectedLesson) {
     const isCompleted = state.completedLessons.includes(selectedLesson.id);
@@ -45,7 +53,7 @@ export function LearningPage() {
           }}
           className="flex items-center gap-2 text-sm text-ink-300 hover:text-white transition-colors mb-5"
         >
-          <Icons.ArrowLeft size={16} /> Back to lessons
+          <ArrowLeftIcon size={16} /> Back to lessons
         </button>
 
         <div className="animate-fade-in">
@@ -58,7 +66,7 @@ export function LearningPage() {
             </div>
             {isCompleted && (
               <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20">
-                <Icons.CheckCircle2 size={10} /> Completed
+                <CheckCircle2Icon size={10} /> Completed
               </div>
             )}
           </div>
@@ -66,14 +74,9 @@ export function LearningPage() {
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-white mb-2">{selectedLesson.title}</h1>
           <p className="text-sm text-ink-300 mb-6">{selectedLesson.summary}</p>
 
-          {/* Sections */}
           <div className="space-y-4 mb-8">
             {selectedLesson.sections.map((section, i) => (
-              <div
-                key={i}
-                className="card-surface p-5 animate-slide-up"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
+              <div key={i} className="card-surface p-5 animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
                 <h3 className="font-display font-semibold text-white text-base mb-2 flex items-center gap-2">
                   <span
                     className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold font-mono shrink-0"
@@ -88,10 +91,9 @@ export function LearningPage() {
             ))}
           </div>
 
-          {/* Interactive checklist */}
           <div className="card-surface p-5 mb-6">
             <h3 className="font-display font-semibold text-white text-base mb-4 flex items-center gap-2">
-              <Icons.CheckSquare size={18} className="text-primary" />
+              <CheckSquareIcon size={18} className="text-primary" />
               Security Checklist
               <span className="text-xs text-ink-300 font-normal ml-auto">
                 {checkedItems.size}/{selectedLesson.checklist.length}
@@ -122,7 +124,7 @@ export function LearningPage() {
                         checked ? 'bg-success border-success' : 'border-ink-500'
                       }`}
                     >
-                      {checked && <Icons.Check size={12} className="text-ink-950" strokeWidth={3} />}
+                      {checked && <CheckIcon size={12} className="text-ink-950" strokeWidth={3} />}
                     </div>
                     <span className={`text-sm ${checked ? 'text-white' : 'text-ink-200'}`}>{item}</span>
                   </button>
@@ -131,7 +133,6 @@ export function LearningPage() {
             </div>
           </div>
 
-          {/* Complete button */}
           {!isCompleted && (
             <button
               onClick={() => {
@@ -141,13 +142,11 @@ export function LearningPage() {
               }}
               disabled={!canComplete}
               className={`w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
-                canComplete
-                  ? 'btn-primary'
-                  : 'bg-ink-700/40 text-ink-400 border border-ink-600/20 cursor-not-allowed'
+                canComplete ? 'btn-primary' : 'bg-ink-700/40 text-ink-400 border border-ink-600/20 cursor-not-allowed'
               }`}
             >
               {canComplete ? (
-                <>Complete Lesson & Earn XP <Icons.ArrowRight size={16} /></>
+                <>Complete Lesson & Earn XP <ArrowRightIcon size={16} /></>
               ) : (
                 `Check all ${selectedLesson.checklist.length} items to complete`
               )}
@@ -162,7 +161,7 @@ export function LearningPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       <div className="animate-fade-in">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-2">
-          <Icons.BookOpen size={14} /> Learning Center
+          <BookOpenIcon size={14} /> Learning Center
         </div>
         <h1 className="font-display text-3xl font-bold text-white">Learn the Fundamentals</h1>
         <p className="text-sm text-ink-300 mt-1.5 max-w-lg">
@@ -172,7 +171,7 @@ export function LearningPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {lessons.map((lesson, i) => {
-          const IconComp = Icons[categoryIcons[lesson.category] as keyof typeof Icons] as Icons.LucideIcon;
+          const IconComp = getIcon(categoryIcons[lesson.category] ?? 'BookOpen');
           const completed = state.completedLessons.includes(lesson.id);
           const skillColor = skillColors[lesson.skill] ?? '#3dd6c6';
           return (
@@ -184,7 +183,7 @@ export function LearningPage() {
             >
               {completed && (
                 <div className="absolute top-4 right-4 flex items-center gap-1 text-[10px] uppercase tracking-wider text-success font-medium">
-                  <Icons.CheckCircle2 size={12} /> Done
+                  <CheckCircle2Icon size={12} /> Done
                 </div>
               )}
               <div className="flex items-start gap-4">
@@ -210,11 +209,7 @@ export function LearningPage() {
       </div>
 
       {lessons.length === 0 && (
-        <EmptyState
-          icon={Icons.BookOpen}
-          title="No lessons available"
-          description="Lessons will appear here once they are added."
-        />
+        <EmptyState icon={BookOpenIcon} title="No lessons available" description="Lessons will appear here once they are added." />
       )}
     </div>
   );

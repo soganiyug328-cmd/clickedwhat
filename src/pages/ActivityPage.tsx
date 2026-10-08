@@ -1,33 +1,16 @@
 import { useApp } from '@/context/AppContext';
-import * as Icons from 'lucide-react';
+import { getIcon } from '@/components/iconRegistry';
+import type { LucideIcon } from 'lucide-react';
 import { EmptyState } from '@/components/ui/Feedback';
 import type { ActivityEvent } from '@/types';
 
-const eventConfig: Record<
-  ActivityEvent['type'],
-  { icon: typeof Icons.CheckCircle2; color: string }
-> = {
-  scenario_complete: { icon: Icons.Crosshair, color: '#3dd6c6' },
-  score_change: { icon: Icons.TrendingUp, color: '#4d8dff' },
-  badge_unlock: { icon: Icons.Trophy, color: '#ffaa33' },
-  level_up: { icon: Icons.Star, color: '#3ee08a' },
-  lesson_complete: { icon: Icons.BookOpen, color: '#b388ff' },
+const eventConfig: Record<ActivityEvent['type'], { icon: LucideIcon; color: string }> = {
+  scenario_complete: { icon: getIcon('Crosshair'), color: '#3dd6c6' },
+  score_change: { icon: getIcon('TrendingUp'), color: '#4d8dff' },
+  badge_unlock: { icon: getIcon('Trophy'), color: '#ffaa33' },
+  level_up: { icon: getIcon('Star'), color: '#3ee08a' },
+  lesson_complete: { icon: getIcon('BookOpen'), color: '#b388ff' },
 };
-
-function formatDate(ts: number): string {
-  const date = new Date(ts);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
 
 function formatTime(ts: number): string {
   return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -35,18 +18,19 @@ function formatTime(ts: number): string {
 
 export function ActivityPage() {
   const { state } = useApp();
+  const ActivityIcon = getIcon('Activity');
 
   if (state.activity.length === 0) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
         <div className="mb-6 animate-fade-in">
           <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-2">
-            <Icons.Activity size={14} /> Activity
+            <ActivityIcon size={14} /> Activity
           </div>
           <h1 className="font-display text-3xl font-bold text-white">Your Activity Timeline</h1>
         </div>
         <EmptyState
-          icon={Icons.Activity}
+          icon={ActivityIcon}
           title="No activity yet"
           description="Your security actions will appear here as you complete scenarios, earn XP, and unlock badges."
         />
@@ -54,7 +38,6 @@ export function ActivityPage() {
     );
   }
 
-  // Group by day
   const groups: Record<string, ActivityEvent[]> = {};
   for (const event of state.activity) {
     const date = new Date(event.timestamp);
@@ -67,7 +50,7 @@ export function ActivityPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       <div className="animate-fade-in">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-primary mb-2">
-          <Icons.Activity size={14} /> Activity
+          <ActivityIcon size={14} /> Activity
         </div>
         <h1 className="font-display text-3xl font-bold text-white">Your Activity Timeline</h1>
         <p className="text-sm text-ink-300 mt-1.5">Every decision, score change, and badge unlock — all in one place.</p>
@@ -81,7 +64,6 @@ export function ActivityPage() {
               <div className="flex-1 h-px bg-ink-700/40" />
             </div>
             <div className="relative pl-6">
-              {/* Timeline line */}
               <div className="absolute left-[7px] top-2 bottom-2 w-px bg-ink-700/40" />
 
               <div className="space-y-3">
@@ -91,13 +73,9 @@ export function ActivityPage() {
                   const isPositive = event.xp === undefined || event.xp > 0;
                   return (
                     <div key={event.id} className="relative animate-slide-up">
-                      {/* Dot */}
                       <div
                         className="absolute -left-6 top-3.5 w-3.5 h-3.5 rounded-full border-2 border-ink-900 z-10"
-                        style={{
-                          background: cfg.color,
-                          boxShadow: `0 0 6px ${cfg.color}66`,
-                        }}
+                        style={{ background: cfg.color, boxShadow: `0 0 6px ${cfg.color}66` }}
                       />
                       <div className="card-surface p-4 group hover:border-ink-500/30 transition-all">
                         <div className="flex items-start gap-3">
